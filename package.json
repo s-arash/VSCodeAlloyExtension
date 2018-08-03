@@ -2,7 +2,7 @@
     "name": "alloy",
     "displayName": "Alloy",
     "description": "support for the Alloy modelling language",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "publisher": "ArashSahebolamri",
     "engines": {
         "vscode": "^1.23.0"
