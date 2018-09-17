@@ -2,8 +2,12 @@
     "name": "alloy",
     "displayName": "Alloy",
     "description": "support for the Alloy modelling language",
-    "version": "0.1.1",
+    "version": "0.2.1",
     "publisher": "ArashSahebolamri",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/s-arash/org.alloytools.alloy/tree/ls"
+    },
     "engines": {
         "vscode": "^1.23.0"
     },
@@ -27,18 +31,38 @@
                 ]
             }
         ],
+        "configuration": [
+			{
+				"title": "Alloy",
+				"properties": {
+					"alloy.commandHighlightMode": {
+                        "type": "string",
+                        "enum": [
+                            "codelens",
+                            "link"
+                        ],
+						"default": "codelens",
+						"description": "How run and check commands should be highlighted in code"
+					}
+				}
+			}
+		],
         "commands": [
             {
-                "command": "OpenAlloyEditor",
+                "command": "alloy.openAlloyEditor",
                 "title": "Open Alloy Editor"
             },
             {
-                "command": "ListAlloyCommands",
+                "command": "alloy.listCommands",
                 "title": "List Alloy Commands"
             },
             {
-                "command": "ExecuteAllAlloyCommands",
+                "command": "alloy.executeAllCommands",
                 "title": "Execute All Alloy Commands"
+            },
+            {
+                "command": "alloy.openLatestInstance",
+                "title": "Open Latest Alloy Instance"
             }
         ]
     },
@@ -52,6 +76,7 @@
     "author": {
         "name": "Arash Sahebolamri"
     },
+    "qna": "marketplace",
     "scripts": {
         "vscode:prepublish": "npm run compile",
         "compile": "tsc -p ./",

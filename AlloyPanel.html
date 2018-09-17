@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alloy</title>
+</head>
+
+<body>
+
+    <div id='log' style="width: 100%"> </div>
+    <button id='btnStop' style="margin:5px 5px 5px 0px; padding:5px;"> Stop </button>
+
+    <script>
+        const logPanel = document.getElementById('log');
+        const vscode = acquireVsCodeApi();
+        const btnStop = document.getElementById('btnStop');
+
+        btnStop.addEventListener("click", () => {
+            vscode.postMessage({ method: "stop" });
+        });
+        // Handle the message inside the webview
+        window.addEventListener('message', event => {
+            const req = event.data;
+            
+            let style = "";
+            if(req.bold)
+                style += "font-weight:bold;";
+            if(req.messageType == 4)
+                style += "color: red;";
+
+            if (req.messageType == 0 || req.messageType == 1)
+                btnStop.hidden = false;
+            else if (req.messageType == 2 || req.messageType == 3)
+                btnStop.hidden = true;
+
+            if (req.replaceLast) {
+                logPanel.removeChild(logPanel.lastChild);
+            }
+
+            if (req.link) {
+                let link = document.createElement("a");
+                link.setAttribute("style", style);
+                link.innerText = req.message;
+                link.href = "#";
+
+                vscode.postMessage({ method: "instanceCreated", data: req });
+                link.addEventListener("click", () => {
+                    vscode.postMessage({ method: "model", data: req });
+                    return false;
+                });
+                logPanel.appendChild(link);
+            }
+            else {
+                let text = document.createElement("span");
+                text.setAttribute("style", style);
+                text.innerHTML = req.message.replace(/\n/g, "<br>");
+                logPanel.appendChild(text);
+            }
+
+            if (req.messageType == 3) {
+                logPanel.appendChild(document.createElement("hr"));
+            }
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+
+// enum AlloyLanguageServerMessageType{
+// 	RunStarted, 0
+// 	RunInProgress, 1
+// 	RunResult, 2
+// 	RunCompleted, 3
+// Warning, 4
+// }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,15 @@
+out
+node_modules
+.vscode-test/
+*.vsix
+
+alloy.sh
+packageAndInstall.ps1
+media
+alloy.sh
+package.json.extra
+packageAndInstall.ps1
+vsc-extension-quickstart.md
+*.jar
+
+src/test/
