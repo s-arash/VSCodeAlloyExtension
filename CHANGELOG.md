@@ -41,3 +41,7 @@ Improved find references support
 Implemented full rename support
 
 Added hover, definition, and rename support for macros
+
+## 0.3.0
+
+Added document and workspace symbol search support

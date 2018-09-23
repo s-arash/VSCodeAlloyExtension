@@ -2,7 +2,7 @@
     "name": "alloy",
     "displayName": "Alloy",
     "description": "support for the Alloy modelling language",
-    "version": "0.2.1",
+    "version": "0.3.0",
     "publisher": "ArashSahebolamri",
     "repository": {
         "type": "git",

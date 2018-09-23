@@ -13,13 +13,20 @@ This extension supports the [Alloy](http://alloytools.org/) modelling language.
 
 ![go to definition support](https://imgur.com/download/Dyq9b0w)
 
-- Rename support (works across files)
 
-![rename support](https://imgur.com/download/vw3Mpf7)
 
 - Find References support
+- Rename support (works across files)
+<!-- ![rename support](https://imgur.com/download/vw3Mpf7) -->
+<!-- ![find references support](https://imgur.com/download/LhpXCZX) -->
 
-![find references support](https://imgur.com/download/LhpXCZX)
+![ref, rename support](https://imgur.com/download/T2ZHszv)
+
+- Document outline/symbol search support
+- Folder symbol search support 
+
+<!-- ![symbol support](https://imgur.com/download/1booynh) -->
+![symbol support](https://imgur.com/download/Kze9f6e)
 
 (Syntax highlighting provided by [alloy-vscode](https://marketplace.visualstudio.com/items?itemName=DongyuZhao.alloy-vscode))
 
