@@ -11,19 +11,27 @@ import {
 	Command,
 	CancellationToken,
 	ProvideCodeLensesSignature,
-	ProvideDocumentLinksSignature
+	ProvideDocumentLinksSignature,
+	CodeLensRequest,
+	CodeLensParams,
+	DocumentLink,
 } from 'vscode-languageclient';
 
 import net = require('net');
 import fs = require('fs');
 import { ChildProcess, spawn } from 'child_process';
 import { TextDocument } from 'vscode';
+import { log } from 'util';
 
 
 let lsProc: ChildProcess;
 let client: LanguageClient;
 let alloyWebViewContent: string;
 let latestInstanceLink : string | null = null;
+
+function isAlloyLangId (id : String) : boolean {
+	return id === "alloy" || id === "markdown";
+} 
 
 export function activate(context: vscode.ExtensionContext) {
 	const console = vscode.window.createOutputChannel("Alloy Extension");
@@ -42,7 +50,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	disposable = vscode.commands.registerCommand('alloy.executeAllCommands', () => {
 		let editor = vscode.window.activeTextEditor;
-		if (editor && !editor.document.isUntitled && editor.document.languageId === "alloy"){
+		if (editor && !editor.document.isUntitled && isAlloyLangId("alloy")){
 			client.sendNotification("ExecuteAlloyCommand", [editor.document.uri.toString(), -1, 0, 0]);
 		}
 	});
@@ -50,7 +58,7 @@ export function activate(context: vscode.ExtensionContext) {
 	
 	disposable = vscode.commands.registerCommand('alloy.openAlloyEditor', () => {
 		let editor = vscode.window.activeTextEditor;
-		if(editor && !editor.document.isUntitled && editor.document.languageId === "alloy"){
+		if(editor && !editor.document.isUntitled && isAlloyLangId(editor.document.languageId)){
 			spawn("java", ["-jar", alloyJar, editor.document.fileName] );
 		}else{
 			spawn("java", ["-jar", alloyJar] );
@@ -60,7 +68,7 @@ export function activate(context: vscode.ExtensionContext) {
 	
 	disposable = vscode.commands.registerCommand('alloy.listCommands', () => {
 		let editor = vscode.window.activeTextEditor;
-		if(editor && !editor.document.isUntitled && editor.document.languageId === "alloy")
+		if(editor && !editor.document.isUntitled && isAlloyLangId(editor.document.languageId))
 			client.sendNotification("ListAlloyCommands", editor.document.uri.toString());
 	});
 	context.subscriptions.push(disposable);
@@ -74,6 +82,27 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 	context.subscriptions.push(disposable);
 
+	disposable = vscode.commands.registerCommand('alloy.executeCommandUnderCursor', () => {
+
+		let commandFound = false;
+		if(vscode.window.activeTextEditor && vscode.window.activeTextEditor.selection.active){
+			const cursor = vscode.window.activeTextEditor.selection.active;
+			const documentUri = vscode.window.activeTextEditor!.document.uri.toString();
+			if(commands){
+				let command = 
+					commands.find(codeLens => codeLens.range.contains(cursor) && codeLens.command!.arguments![0] === documentUri);
+				if (command){
+					vscode.commands.executeCommand(command.command!.command, ...command.command!.arguments!);
+					commandFound = true;
+				}
+			}
+		}
+		if(!commandFound){
+			vscode.window.showWarningMessage("Cursor is not inside an Alloy command!");
+		}
+	});
+	context.subscriptions.push(disposable);
+
 	let port: number = Math.floor(randomNumber(49152, 65535));
 	let serverExecOptions: ExecutableOptions = {stdio: "pipe"};
 	let serverExec: Executable = {
@@ -82,12 +111,16 @@ export function activate(context: vscode.ExtensionContext) {
 		options: serverExecOptions
 	};
 
-	
+	type nil = null | undefined;
+	let commands : vscode.CodeLens[] | nil;
 	let middleware: Middleware = {
 		
 		provideCodeLenses : ( document: TextDocument, token: CancellationToken, next: ProvideCodeLensesSignature) => {
 			let mode  = vscode.workspace.getConfiguration("alloy").get("commandHighlightMode", "") ;
-			return mode === "codelens" ? next(document, token) : [];
+			let res = next(document, token);
+			actOnProvideResult(res, codeLensRes => commands = codeLensRes);
+
+			return mode === "codelens" ? res : [];
 		},
 
 		provideDocumentLinks : ( document: TextDocument, token: CancellationToken, next: ProvideDocumentLinksSignature) => {
@@ -97,7 +130,7 @@ export function activate(context: vscode.ExtensionContext) {
 	};
 
 	let clientOptions: LanguageClientOptions = {
-		documentSelector: [{ scheme: 'file', language: 'alloy' }],
+		documentSelector: [{ scheme: 'file', language: 'alloy' }, { scheme: 'file', language: 'markdown' }],
 		middleware : middleware
 	};
 
@@ -109,7 +142,7 @@ export function activate(context: vscode.ExtensionContext) {
 		clientOptions,
 		false
 	);
-	
+
 	let lsProc = spawn(serverExec.command, serverExec.args, serverExec.options);
 
 	console.appendLine("Alloy language server proc (Alloy JAR) started!");
@@ -141,7 +174,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 	let _webViewPanel : vscode.WebviewPanel | null;
 	let getWebViewPanel = () => {
-		if (_webViewPanel && _webViewPanel.visible){
+		if (_webViewPanel){
+			if (! _webViewPanel.visible) _webViewPanel.reveal(_webViewPanel.viewColumn, true);
 			return _webViewPanel;
 		}
 
@@ -150,7 +184,7 @@ export function activate(context: vscode.ExtensionContext) {
 			retainContextWhenHidden: true
 		};
 		_webViewPanel = vscode.window.createWebviewPanel("side bar", "Alloy", 
-			{viewColumn :  vscode.ViewColumn.Three, preserveFocus: false}, webViewPanelOptions);
+			{viewColumn :  vscode.ViewColumn.Beside, preserveFocus: false}, webViewPanelOptions);
 
 		_webViewPanel.webview.html = alloyWebViewContent;
 		_webViewPanel.webview.onDidReceiveMessage( (req : {method : "model" | "stop" | "instanceCreated" , data: any}) => {
@@ -216,4 +250,21 @@ function randomNumber(from : number, to: number){
 	if(res > to) res = to;
 	if (res < from) res = from;
 	return res;
+}
+
+
+function isFunc(value: any): value is Function {
+	return typeof value  === 'function';
+}
+
+function isThenable<T>(value: any): value is Thenable<T> {
+	return value && isFunc(value.then);
+}
+
+function actOnProvideResult<T> (res: vscode.ProviderResult<T>, func : (res: T | null | undefined) => void ){
+	if(isThenable<T>(res)){
+		res.then(func);
+	}else{
+		func(<T | null | undefined> res);
+	}
 }

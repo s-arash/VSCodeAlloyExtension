@@ -45,3 +45,11 @@ Added hover, definition, and rename support for macros
 ## 0.3.0
 
 Added document and workspace symbol search support
+
+## 0.4.0
+Added the command `executeCommandUnderCursor` (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd> <kbd>E</kbd>)
+
+Added key bindings for Alloy extension commands
+
+## 0.5.0
+Added support for Alloy Markdown files

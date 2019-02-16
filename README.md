@@ -3,7 +3,7 @@
 This extension supports the [Alloy](http://alloytools.org/) modelling language.
 
 ## Features
-- Running Alloy commands from VS Code
+- Running Alloy commands from VS Code (using mouse or key combo <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd> <kbd>E</kbd>)
 - Viewing results (instances/counterexamples)
 - Editor integrated error reporting
 
@@ -27,13 +27,16 @@ This extension supports the [Alloy](http://alloytools.org/) modelling language.
 
 <!-- ![symbol support](https://imgur.com/download/1booynh) -->
 ![symbol support](https://imgur.com/download/Kze9f6e)
+- Support for Alloy Markdown files
 
 (Syntax highlighting provided by [alloy-vscode](https://marketplace.visualstudio.com/items?itemName=DongyuZhao.alloy-vscode))
 
 This extension is bundled with a [custom version](https://github.com/s-arash/org.alloytools.alloy/tree/ls) of the Alloy analyzer JAR that supports the Language Server Protocol.
 ## Tips
 
-- To change Alloy settings (SAT solver, allow warnings, etc.) open the command palette (<kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd>), and find the command `Open Alloy Editor`. This will open the bundled Alloy analyzer.
+- To change Alloy settings (SAT solver, allow warnings, etc.) open the command palette (<kbd>Ctrl</kbd>/<kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd>), and find the command `Open Alloy Editor`. This will open the bundled Alloy analyzer.
+
+- To execute the Alloy command under cursor, use the command `Execute Current Alloy Command` (key combo <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd> <kbd>E</kbd>).
 
 - To select an Alloy command from a drop down menu, use the command `List Alloy Commands`.
 

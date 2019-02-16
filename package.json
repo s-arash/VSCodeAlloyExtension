@@ -2,7 +2,7 @@
     "name": "alloy",
     "displayName": "Alloy",
     "description": "support for the Alloy modelling language",
-    "version": "0.3.0",
+    "version": "0.5.0",
     "publisher": "ArashSahebolamri",
     "repository": {
         "type": "git",
@@ -15,7 +15,9 @@
         "Other"
     ],
     "activationEvents": [
-        "onLanguage:alloy"
+        "onLanguage:alloy",
+        "onLanguage:markdown",
+        "onCommand:alloy.openAlloyEditor"
     ],
     "main": "./out/extension",
     "contributes": {
@@ -32,44 +34,77 @@
             }
         ],
         "configuration": [
-			{
-				"title": "Alloy",
-				"properties": {
-					"alloy.commandHighlightMode": {
+            {
+                "title": "Alloy",
+                "properties": {
+                    "alloy.commandHighlightMode": {
                         "type": "string",
                         "enum": [
                             "codelens",
                             "link"
                         ],
-						"default": "codelens",
-						"description": "How run and check commands should be highlighted in code"
-					}
-				}
-			}
-		],
+                        "default": "codelens",
+                        "description": "How run and check commands are highlighted in code"
+                    }
+                }
+            }
+        ],
         "commands": [
             {
                 "command": "alloy.openAlloyEditor",
-                "title": "Open Alloy Editor"
+                "title": "Open Alloy Editor",
+                "category": "Alloy"
             },
             {
                 "command": "alloy.listCommands",
-                "title": "List Alloy Commands"
+                "title": "List Alloy Commands",
+                "category": "Alloy"
             },
             {
                 "command": "alloy.executeAllCommands",
-                "title": "Execute All Alloy Commands"
+                "title": "Execute All Alloy Commands",
+                "category": "Alloy"
             },
             {
                 "command": "alloy.openLatestInstance",
-                "title": "Open Latest Alloy Instance"
+                "title": "Open Latest Alloy Instance",
+                "category": "Alloy"
+            },
+            {
+                "command": "alloy.executeCommandUnderCursor",
+                "title": "Execute Current Alloy Command",
+                "category": "Alloy"
+            }
+        ],
+        "keybindings": [
+            {
+                "key": "ctrl+shift+a e",
+                "command": "alloy.executeCommandUnderCursor",
+                "when": "editorTextFocus && editorLangId == 'alloy'"
+            },
+            {
+                "key": "ctrl+shift+a a",
+                "command": "alloy.executeAllCommands",
+                "when": "editorTextFocus && editorLangId == 'alloy'"
+            },
+            {
+                "key": "ctrl+shift+a c",
+                "command": "alloy.listCommands",
+                "when": "editorTextFocus && editorLangId == 'alloy'"
+            },
+            {
+                "key": "ctrl+shift+a o",
+                "command": "alloy.openAlloyEditor"
+            },
+            {
+                "key": "ctrl+shift+a l",
+                "command": "alloy.openLatestInstance"
             }
         ]
     },
     "keywords": [
         "Alloy"
     ],
-    "preview": true,
     "extensionDependencies": [
         "DongyuZhao.alloy-vscode"
     ],
