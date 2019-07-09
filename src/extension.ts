@@ -15,12 +15,13 @@ import {
 	CodeLensRequest,
 	CodeLensParams,
 	DocumentLink,
+	SymbolKind,
 } from 'vscode-languageclient';
 
 import net = require('net');
 import fs = require('fs');
 import { ChildProcess, spawn } from 'child_process';
-import { TextDocument } from 'vscode';
+import { TextDocument, Uri } from 'vscode';
 import { log } from 'util';
 
 
@@ -50,7 +51,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	disposable = vscode.commands.registerCommand('alloy.executeAllCommands', () => {
 		let editor = vscode.window.activeTextEditor;
-		if (editor && !editor.document.isUntitled && isAlloyLangId("alloy")){
+		if (editor && !editor.document.isUntitled && isAlloyLangId(editor.document.languageId)){
 			client.sendNotification("ExecuteAlloyCommand", [editor.document.uri.toString(), -1, 0, 0]);
 		}
 	});
@@ -83,14 +84,16 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(disposable);
 
 	disposable = vscode.commands.registerCommand('alloy.executeCommandUnderCursor', () => {
-
+		const editor = vscode.window.activeTextEditor;
 		let commandFound = false;
-		if(vscode.window.activeTextEditor && vscode.window.activeTextEditor.selection.active){
-			const cursor = vscode.window.activeTextEditor.selection.active;
-			const documentUri = vscode.window.activeTextEditor!.document.uri.toString();
-			if(commands){
+		if(editor && editor.selection.active){
+			const cursor = editor.selection.active;
+			const documentUri = editor.document.uri;
+			const docCommands = commands.get(documentUri);
+			if(docCommands){
 				let command = 
-					commands.find(codeLens => codeLens.range.contains(cursor) && codeLens.command!.arguments![0] === documentUri);
+					docCommands.find(codeLens => codeLens.range.contains(cursor) && 
+									             codeLens.command!.arguments![0] === documentUri.toString());
 				if (command){
 					vscode.commands.executeCommand(command.command!.command, ...command.command!.arguments!);
 					commandFound = true;
@@ -101,6 +104,7 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.window.showWarningMessage("Cursor is not inside an Alloy command!");
 		}
 	});
+
 	context.subscriptions.push(disposable);
 
 	let port: number = Math.floor(randomNumber(49152, 65535));
@@ -112,13 +116,13 @@ export function activate(context: vscode.ExtensionContext) {
 	};
 
 	type nil = null | undefined;
-	let commands : vscode.CodeLens[] | nil;
+	let commands : Map<Uri, vscode.CodeLens[] | nil> = new Map();
 	let middleware: Middleware = {
 		
 		provideCodeLenses : ( document: TextDocument, token: CancellationToken, next: ProvideCodeLensesSignature) => {
 			let mode  = vscode.workspace.getConfiguration("alloy").get("commandHighlightMode", "") ;
 			let res = next(document, token);
-			actOnProvideResult(res, codeLensRes => commands = codeLensRes);
+			actOnProvideResult(res, codeLensRes => commands.set(document.uri, codeLensRes));
 
 			return mode === "codelens" ? res : [];
 		},
@@ -145,7 +149,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	let lsProc = spawn(serverExec.command, serverExec.args, serverExec.options);
 
-	console.appendLine("Alloy language server proc (Alloy JAR) started!");
+	console.appendLine("Alloy language server proc (Alloy JAR) started.");
 
 	lsProc.stdout.on("data", data => {
 		console.appendLine("Server: " + data.toString());
@@ -170,7 +174,7 @@ export function activate(context: vscode.ExtensionContext) {
 		});
 	});
 	client.start();
-	console.appendLine("LanguageClient started");
+	console.appendLine("LanguageClient started.");
 
 	let _webViewPanel : vscode.WebviewPanel | null;
 	let getWebViewPanel = () => {
@@ -235,7 +239,7 @@ function createClientOwnedTCPServerOptions(port: number): ServerOptions {
 			net.createServer( socket => {
 				let res: StreamInfo = { reader: <NodeJS.ReadableStream>socket, writer: socket };
 				resolve(res);
-			}).listen(port);
+			}).listen(port, "localhost");
 			
 		});
 	};

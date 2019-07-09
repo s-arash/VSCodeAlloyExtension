@@ -43,13 +43,13 @@
                 let link = document.createElement("a");
                 link.setAttribute("style", style);
                 link.innerText = req.message;
-                link.href = "#";
+                link.href = "";
 
                 vscode.postMessage({ method: "instanceCreated", data: req });
-                link.addEventListener("click", () => {
+                link.onclick = () => {
                     vscode.postMessage({ method: "model", data: req });
                     return false;
-                });
+                };
                 logPanel.appendChild(link);
             }
             else {
@@ -70,7 +70,7 @@
 // 	RunInProgress, 1
 // 	RunResult, 2
 // 	RunCompleted, 3
-// Warning, 4
+//  Warning, 4
 // }
     </script>
 </body>
