@@ -12,3 +12,4 @@ alloy.sh
 packageAndInstall.ps1
 media
 *.vsix
+package.json.extra

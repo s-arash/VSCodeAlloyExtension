@@ -10,10 +10,9 @@ This extension supports the [Alloy](http://alloytools.org/) modelling language.
 ![executing alloy commands](https://imgur.com/download/dtPZEBW)
 
 - Go to Definition support
+- Support for Alloy Markdown files
 
-![go to definition support](https://imgur.com/download/Dyq9b0w)
-
-
+![go to definition and markdown support](https://i.imgur.com/fKWZ4TE.gif)
 
 - Find References support
 - Rename support (works across files)
@@ -27,7 +26,6 @@ This extension supports the [Alloy](http://alloytools.org/) modelling language.
 
 <!-- ![symbol support](https://imgur.com/download/1booynh) -->
 ![symbol support](https://imgur.com/download/Kze9f6e)
-- Support for Alloy Markdown files
 
 (Syntax highlighting provided by [alloy-vscode](https://marketplace.visualstudio.com/items?itemName=DongyuZhao.alloy-vscode))
 

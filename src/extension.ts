@@ -104,7 +104,6 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.window.showWarningMessage("Cursor is not inside an Alloy command!");
 		}
 	});
-
 	context.subscriptions.push(disposable);
 
 	let port: number = Math.floor(randomNumber(49152, 65535));
@@ -149,7 +148,14 @@ export function activate(context: vscode.ExtensionContext) {
 
 	let lsProc = spawn(serverExec.command, serverExec.args, serverExec.options);
 
-	console.appendLine("Alloy language server proc (Alloy JAR) started.");
+	lsProc.on("error", (err) => {
+		console.appendLine("ERROR CRAETING ALLOY PROCESS: " + err);
+		vscode.window.showErrorMessage("Could not start the Alloy process, make sure Java is installed and included in PATH." +
+										" Error: " + err.message);
+	});
+	if (lsProc.pid){
+		console.appendLine("Alloy language server proc (Alloy JAR) started. PID: " + lsProc.pid);
+	}
 
 	lsProc.stdout.on("data", data => {
 		console.appendLine("Server: " + data.toString());

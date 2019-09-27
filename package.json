@@ -2,7 +2,7 @@
     "name": "alloy",
     "displayName": "Alloy",
     "description": "support for the Alloy modelling language",
-    "version": "0.5.1",
+    "version": "0.6.0",
     "publisher": "ArashSahebolamri",
     "repository": {
         "type": "git",
@@ -136,10 +136,10 @@
     },
     "devDependencies": {
         "@types/mocha": "^2.2.42",
-        "@types/node": "^7.10.6",
-        "tslint": "^5.18.0",
+        "@types/node": "^7.10.7",
+        "tslint": "^5.20.0",
         "typescript": "^2.6.1",
-        "vscode": "^1.1.35"
+        "vscode": "^1.1.36"
     },
     "dependencies": {
         "vscode-languageclient": "^4.4.2"
