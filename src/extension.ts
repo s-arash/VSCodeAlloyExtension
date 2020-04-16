@@ -146,15 +146,19 @@ export function activate(context: vscode.ExtensionContext) {
 		false
 	);
 
+	console.appendLine("Starting the Alloy process...");
 	let lsProc = spawn(serverExec.command, serverExec.args, serverExec.options);
 
+	lsProc.on("exit", (code, signal) => {
+		console.appendLine("Alloy JAR process exited. code: " + code + (signal ? "; signal: " + signal : ""));
+	});
 	lsProc.on("error", (err) => {
-		console.appendLine("ERROR CRAETING ALLOY PROCESS: " + err);
+		console.appendLine("ERROR CREATING ALLOY PROCESS: " + err);
 		vscode.window.showErrorMessage("Could not start the Alloy process, make sure Java is installed and included in PATH." +
 										" Error: " + err.message);
 	});
 	if (lsProc.pid){
-		console.appendLine("Alloy language server proc (Alloy JAR) started. PID: " + lsProc.pid);
+		console.appendLine("Alloy language server process (Alloy JAR) started. PID: " + lsProc.pid);
 	}
 
 	lsProc.stdout.on("data", data => {

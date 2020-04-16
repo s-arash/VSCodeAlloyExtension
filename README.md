@@ -1,31 +1,29 @@
-# Alloy 
-
-This extension supports the [Alloy](http://alloytools.org/) modelling language.
+This extension provides rich support for the [Alloy](http://alloytools.org/) specification language.
 
 ## Features
 - Running Alloy commands from VS Code (using mouse or key combo <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>A</kbd> <kbd>E</kbd>)
 - Viewing results (instances/counterexamples)
 - Editor integrated error reporting
 
-![executing alloy commands](https://imgur.com/download/dtPZEBW)
+![executing alloy commands](https://github.com/s-arash/VSCodeAlloyExtension/raw/master/media_readme/executing-commands.gif)
 
 - Go to Definition support
 - Support for Alloy Markdown files
 
-![go to definition and markdown support](https://i.imgur.com/fKWZ4TE.gif)
+![go to definition and markdown support](https://github.com/s-arash/VSCodeAlloyExtension/raw/master/media_readme/alloy-markdown2.gif)
 
 - Find References support
 - Rename support (works across files)
 <!-- ![rename support](https://imgur.com/download/vw3Mpf7) -->
 <!-- ![find references support](https://imgur.com/download/LhpXCZX) -->
 
-![ref, rename support](https://imgur.com/download/T2ZHszv)
+![ref, rename support](https://github.com/s-arash/VSCodeAlloyExtension/raw/master/media_readme/demo-ref-rename2.gif)
 
 - Document outline/symbol search support
 - Folder symbol search support 
 
 <!-- ![symbol support](https://imgur.com/download/1booynh) -->
-![symbol support](https://imgur.com/download/Kze9f6e)
+![symbol support](https://github.com/s-arash/VSCodeAlloyExtension/raw/master/media_readme/demo-symbol3.gif)
 
 (Syntax highlighting provided by [alloy-vscode](https://marketplace.visualstudio.com/items?itemName=DongyuZhao.alloy-vscode))
 
