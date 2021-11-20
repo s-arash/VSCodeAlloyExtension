@@ -1,3 +1,6 @@
+## 0.7.0
+- Updated bundled Alloy to version 6.1, thanks to great work by Alejandro Serrano.
+
 ## 0.6.0
 - Updated bundled Alloy to version 5.1
 - Cleaned up the side panel output
