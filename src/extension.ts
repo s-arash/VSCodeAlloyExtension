@@ -34,7 +34,7 @@ function isAlloyLangId (id : String) : boolean {
 	return id === "alloy" || id === "markdown";
 } 
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
 	const console = vscode.window.createOutputChannel("Alloy Extension");
 
 	const alloyJar = context.asAbsolutePath("org.alloytools.alloy.dist.jar");
@@ -138,13 +138,34 @@ export function activate(context: vscode.ExtensionContext) {
 	};
 
 	// Create the language client
+	let serverBoundResolve;
+	const clientUp = new Promise(r => { serverBoundResolve = r; });
 	client = new LanguageClient(
 		'AlloyLanguageService',
 		'Alloy Language Service',
-		createClientOwnedTCPServerOptions(port),
+		createClientOwnedTCPServerOptions(port, serverBoundResolve),
 		clientOptions,
 		false
 	);
+
+	client.onReady().then(() => {
+		client.onNotification("alloy/showExecutionOutput", (req: { message: string, messageType: number, bold: boolean }) => {
+			getWebViewPanel().webview.postMessage(req);
+		});
+		client.onNotification("alloy/commandsListResult", res => {
+			let commands : {title: string, command: Command}[] = res.commands;
+			let qpitems = commands.map(item => ({ label: item.title, command: item.command}));
+			vscode.window.showQuickPick(qpitems, {canPickMany : false, placeHolder : "Select a command to execute"})
+				.then(item => {
+					vscode.commands.executeCommand(item!.command.command, ...item!.command.arguments!);
+			});
+			console.appendLine(JSON.stringify(res));
+
+		});
+	});
+	client.start();
+	await clientUp;
+	console.appendLine("LanguageClient started.");
 
 	console.appendLine("Starting the Alloy process...");
 	let lsProc = spawn(serverExec.command, serverExec.args, serverExec.options);
@@ -167,24 +188,6 @@ export function activate(context: vscode.ExtensionContext) {
 	lsProc.stderr.on("data", data => {
 		console.appendLine("Server err: " + data.toString());
 	});
-
-	client.onReady().then(() => {
-		client.onNotification("alloy/showExecutionOutput", (req: { message: string, messageType: number, bold: boolean }) => {
-			getWebViewPanel().webview.postMessage(req);
-		});
-		client.onNotification("alloy/commandsListResult", res => {
-			let commands : {title: string, command: Command}[] = res.commands;
-			let qpitems = commands.map(item => ({ label: item.title, command: item.command}));
-			vscode.window.showQuickPick(qpitems, {canPickMany : false, placeHolder : "Select a command to execute"})
-				.then(item => {
-					vscode.commands.executeCommand(item!.command.command, ...item!.command.arguments!);
-			});
-			console.appendLine(JSON.stringify(res));
-			
-		});
-	});
-	client.start();
-	console.appendLine("LanguageClient started.");
 
 	let _webViewPanel : vscode.WebviewPanel | null;
 	let getWebViewPanel = () => {
@@ -240,7 +243,7 @@ export function deactivate() {
 	lsProc.kill();
 }
 
-function createClientOwnedTCPServerOptions(port: number): ServerOptions {
+function createClientOwnedTCPServerOptions(port: number, boundResolve: Function): ServerOptions {
 
 	let serverExec: ServerOptions = function () {
 
@@ -249,7 +252,7 @@ function createClientOwnedTCPServerOptions(port: number): ServerOptions {
 			net.createServer( socket => {
 				let res: StreamInfo = { reader: <NodeJS.ReadableStream>socket, writer: socket };
 				resolve(res);
-			}).listen(port, "localhost");
+			}).listen(port, "localhost", boundResolve);
 			
 		});
 	};
