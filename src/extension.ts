@@ -138,12 +138,11 @@ export async function activate(context: vscode.ExtensionContext) {
 	};
 
 	// Create the language client
-	let serverBoundResolve;
-	const clientUp = new Promise(r => { serverBoundResolve = r; });
+	console.appendLine("starting language client on port " + port);
 	client = new LanguageClient(
 		'AlloyLanguageService',
 		'Alloy Language Service',
-		createClientOwnedTCPServerOptions(port, serverBoundResolve),
+		await createClientOwnedTCPServerOptions(port),
 		clientOptions,
 		false
 	);
@@ -164,11 +163,10 @@ export async function activate(context: vscode.ExtensionContext) {
 		});
 	});
 	client.start();
-	await clientUp;
 	console.appendLine("LanguageClient started.");
 
 	console.appendLine("Starting the Alloy process...");
-	let lsProc = spawn(serverExec.command, serverExec.args, serverExec.options);
+	lsProc = spawn(serverExec.command, serverExec.args, serverExec.options);
 
 	lsProc.on("exit", (code, signal) => {
 		console.appendLine("Alloy JAR process exited. code: " + code + (signal ? "; signal: " + signal : ""));
@@ -243,19 +241,22 @@ export function deactivate() {
 	lsProc.kill();
 }
 
-function createClientOwnedTCPServerOptions(port: number, boundResolve: Function): ServerOptions {
-
-	let serverExec: ServerOptions = function () {
-
-		return new Promise((resolve) => {
-
-			net.createServer( socket => {
-				let res: StreamInfo = { reader: <NodeJS.ReadableStream>socket, writer: socket };
-				resolve(res);
-			}).listen(port, "localhost", boundResolve);
-			
+async function createClientOwnedTCPServerOptions(port: number): Promise<ServerOptions> {
+	let continuation: Function;
+	let rejectedContinuation: Function;
+	let promise = new Promise((r, rejected) => {continuation = r; rejectedContinuation = rejected});
+	let streamPromise : Promise<StreamInfo> = new Promise((resolve) => {
+		net.createServer( socket => {
+			let res: StreamInfo = { reader: <NodeJS.ReadableStream>socket, writer: socket };
+			resolve(res);
+		}).listen(port, "localhost", () => continuation())
+		.on("error", (err) => {
+			console.log("error listening: " + err);
+			rejectedContinuation(err);
 		});
-	};
+	});
+	await promise;
+	let serverExec: ServerOptions = () => streamPromise;
 	return serverExec;
 }
 
